@@ -1,7 +1,6 @@
 pub const unicode = @import("unicode/root.zig");
 
-
-test{
+test {
     const std = @import("std");
     std.testing.refAllDecls(@This());
 }

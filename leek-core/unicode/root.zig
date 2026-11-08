@@ -1,6 +1,6 @@
 const std = @import("std");
 pub const segmentation = @import("segmentation.zig");
 
-test{
+test {
     std.testing.refAllDecls(@This());
 }
