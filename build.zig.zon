@@ -1,0 +1,19 @@
+.{
+    .name = .leek,
+    .version = "0.0.0",
+    .fingerprint = 0xdc42b95ea1f5350b,
+    .minimum_zig_version = "0.17.0",
+    .dependencies = .{
+        .termy = .{
+            .url = "git+https://github.com/NoTimeDev/termy-zig.git#a8db1f4880352b7488a9bad4e5a810ab7a12f2e8",
+            .hash = "termy-0.1.0--x1xy9vEAQB1phVQ-SFXitV31-hLbAwpzb77wF8usjUM",
+        },
+    },
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+        "LICENSE",
+        "README.md",
+    },
+}
