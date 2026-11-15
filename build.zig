@@ -11,8 +11,10 @@ pub fn build(b: *std.Build) void {
         .target = target,
     });
 
-    const tui_mod = b.addModule("tui", .{ .root_source_file = b.path("leek-tui/root.zig"), .target = target, .imports = &.{ .{ .name = "termy", .module = termy.module("termy") }, .{ .name = "core", .module = core_mod } } });
-
+    const tui_mod = b.addModule(
+        "tui",
+        .{ .root_source_file = b.path("leek-tui/root.zig"), .target = target, .imports = &.{ .{ .name = "termy", .module = termy.module("termy") }, .{ .name = "core", .module = core_mod } } },
+    );
     const mod = b.createModule(.{
         .root_source_file = b.path("leek/main.zig"),
         .target = target,
