@@ -1,4 +1,5 @@
-/leek-core/unicode/scripts
+/leek-stdx/unicode/scripts
 /.zig-cache
 /zig-out
 /zig-pkg
+.txt

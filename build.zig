@@ -7,8 +7,8 @@ pub fn build(b: *std.Build) void {
     const termy = b.dependency("termy", .{ .target = target, .optimize = optimize });
     const tmod = termy.module("termy");
 
-    const core_mod = b.addModule("core", .{
-        .root_source_file = b.path("leek-core/root.zig"),
+    const stdx_mod = b.addModule("stdx", .{
+        .root_source_file = b.path("leek-stdx/root.zig"),
         .target = target,
     });
 
@@ -19,7 +19,7 @@ pub fn build(b: *std.Build) void {
             .target = target,
             .imports = &.{
                 .{ .name = "termy", .module = tmod },
-                .{ .name = "core", .module = core_mod },
+                .{ .name = "stdx", .module = stdx_mod },
             },
         },
     );
@@ -31,7 +31,7 @@ pub fn build(b: *std.Build) void {
         .imports = &.{
             .{ .name = "termy", .module = tmod },
             .{ .name = "tui", .module = tui_mod },
-            .{ .name = "core", .module = core_mod },
+            .{ .name = "stdx", .module = stdx_mod },
         },
     });
 
@@ -54,27 +54,27 @@ pub fn build(b: *std.Build) void {
     run_cmd.step.dependOn(b.getInstallStep());
     run_cmd.addPassthruArgs();
 
-    const test_core = b.step("test-core", "Run core tests");
+    const test_stdx = b.step("test-stdx", "Run stdx tests");
     const test_tui = b.step("test-tui", "Run TUI tests");
     const test_step = b.step("test", "Run all tests");
 
-    const core_tests = b.addTest(.{
-        .root_module = core_mod,
+    const stdx_tests = b.addTest(.{
+        .root_module = stdx_mod,
     });
 
     const tui_tests = b.addTest(.{
         .root_module = tui_mod,
     });
 
-    const core_run = b.addRunArtifact(core_tests);
-    core_run.has_side_effects = true;
+    const stdx_run = b.addRunArtifact(stdx_tests);
+    stdx_run.has_side_effects = true;
 
     const tui_run = b.addRunArtifact(tui_tests);
     tui_run.has_side_effects = true;
 
-    test_core.dependOn(&core_run.step);
+    test_stdx.dependOn(&stdx_run.step);
     test_tui.dependOn(&tui_run.step);
 
-    test_step.dependOn(&core_run.step);
+    test_step.dependOn(&stdx_run.step);
     test_step.dependOn(&tui_run.step);
 }
