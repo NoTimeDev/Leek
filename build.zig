@@ -5,6 +5,7 @@ pub fn build(b: *std.Build) void {
     const optimize = b.standardOptimizeOption(.{});
 
     const termy = b.dependency("termy", .{ .target = target, .optimize = optimize });
+    const tmod = termy.module("termy");
 
     const core_mod = b.addModule("core", .{
         .root_source_file = b.path("leek-core/root.zig"),
@@ -13,18 +14,35 @@ pub fn build(b: *std.Build) void {
 
     const tui_mod = b.addModule(
         "tui",
-        .{ .root_source_file = b.path("leek-tui/root.zig"), .target = target, .imports = &.{ .{ .name = "termy", .module = termy.module("termy") }, .{ .name = "core", .module = core_mod } } },
+        .{
+            .root_source_file = b.path("leek-tui/root.zig"),
+            .target = target,
+            .imports = &.{
+                .{ .name = "termy", .module = tmod },
+                .{ .name = "core", .module = core_mod },
+            },
+        },
     );
-    const mod = b.createModule(.{
-        .root_source_file = b.path("leek/main.zig"),
+
+    const mod = b.addModule("leek", .{
+        .root_source_file = b.path("leek/root.zig"),
         .target = target,
         .optimize = optimize,
-        .imports = &.{ .{ .name = "tui", .module = tui_mod }, .{ .name = "core", .module = core_mod } },
+        .imports = &.{
+            .{ .name = "termy", .module = tmod },
+            .{ .name = "tui", .module = tui_mod },
+            .{ .name = "core", .module = core_mod },
+        },
     });
 
     const exe = b.addExecutable(.{
         .name = "leek",
-        .root_module = mod,
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("leek/main.zig"),
+            .target = target,
+            .optimize = optimize,
+            .imports = &.{.{ .name = "leek", .module = mod }},
+        }),
     });
 
     b.installArtifact(exe);
@@ -50,6 +68,7 @@ pub fn build(b: *std.Build) void {
 
     const core_run = b.addRunArtifact(core_tests);
     core_run.has_side_effects = true;
+
     const tui_run = b.addRunArtifact(tui_tests);
     tui_run.has_side_effects = true;
 

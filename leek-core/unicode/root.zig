@@ -2,9 +2,9 @@
 //! segmentation gives tools to dectect the boundaries of graphemes
 //! width gives tools to dectect the terminal width of graphemes
 
-const std = @import("std");
 pub const segmentation = @import("segmentation.zig");
+pub const width = @import("width.zig");
 
 test {
-    std.testing.refAllDecls(@This());
+    @import("std").testing.refAllDecls(@This());
 }

@@ -5,8 +5,8 @@
     .minimum_zig_version = "0.17.0",
     .dependencies = .{
         .termy = .{
-            .url = "git+https://github.com/NoTimeDev/termy-zig.git#a8db1f4880352b7488a9bad4e5a810ab7a12f2e8",
-            .hash = "termy-0.1.0--x1xy9vEAQB1phVQ-SFXitV31-hLbAwpzb77wF8usjUM",
+            .url = "git+https://github.com/NoTimeDev/termy-zig.git#cb7641c36dff8b39f5493ce84e2f52e5b5cab767",
+            .hash = "termy-2.0.0--x1xy8bqAQD8j2T0QxEBgpNvzb0aWu6szfKNAxWff5ff",
         },
     },
     .paths = .{
