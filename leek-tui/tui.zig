@@ -35,7 +35,7 @@ pub const Tui = struct {
             stdx.err = "Failed to get window size";
             return err;
         };
-        const size: Rect = .{ .x = ws.columns, .y = ws.rows };
+        const size: Rect = .{ .x = 0, .y = 0, .width = ws.columns, .height = ws.rows };
         return .{ .tty = tty, .cursor = .init(tty), .style = .init(tty), .terminal = terminal, .allocator = allocator, .size = size, .buffer = .{
             try buffer.Buffer.init(allocator, size),
             try buffer.Buffer.init(allocator, size),
@@ -167,7 +167,10 @@ pub const Tui = struct {
                 try self.diff_mod(d.cell.mod, mod);
                 mod = d.cell.mod;
             }
-            try writer.writeAll(d.cell.symbol);
+            if(d.cell.symbol)|sym|
+                try writer.writeAll(sym)
+            else 
+                try writer.writeAll(" ");
         }
         try self.style.setUnderlineColor(.Reset);
         try self.style.setForegroundColor(.Reset);
@@ -183,6 +186,6 @@ pub const Tui = struct {
     }
 
     pub fn render(self: *Tui, widget: anytype, area: Rect) !void {
-        try widget.render(&self.buffer[self.curbuffer], area);
+        try widget.render(self.allocator, &self.buffer[self.curbuffer], area);
     }
 };

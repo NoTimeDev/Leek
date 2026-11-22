@@ -2,6 +2,11 @@
 pub const termy = @import("termy");
 pub const stdx = @import("stdx");
 
+pub const widget =struct{
+    pub const block = @import("widgets/block.zig");
+    pub const text = @import("widgets/block.zig");
+};
+
 pub const tui = @import("tui.zig");
 pub const Tui = tui.Tui;
 const std = @import("std");
@@ -10,4 +15,6 @@ const std = @import("std");
 pub const Rect = struct {
     x: u16,
     y: u16,
+    height: u16,
+    width: u16
 };

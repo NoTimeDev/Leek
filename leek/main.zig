@@ -9,14 +9,12 @@ const App = struct {
     termy_buffer: [1024]u8,
     tui: leek.tui.Tui,
     running: bool,
-    x: bool,
 
     pub fn init(self: *App, io: std.Io) !void {
         self.tty = .init(io, try leek.termy.sysOut(), &self.termy_buffer, try leek.termy.sysIn());
         self.tui = try .init(&self.tty, leek.allocator);
         self.input = .init(&self.tty);
         self.running = true;
-        self.x = false;
     }
 
     pub fn deinit(self: *App) void {
@@ -35,7 +33,7 @@ const App = struct {
                     }
                 },
                 .Resize => |s| {
-                    try self.tui.resize(.{ .x = s.columns, .y = s.rows });
+                    try self.tui.resize(.{ .x = 0, .y = 0, .width = s.columns, .height = s.rows });
                 },
                 else => {},
             }
@@ -43,6 +41,15 @@ const App = struct {
     }
 
     pub fn render(self: *App) !void {
+        try self.tui.render(leek.tui.widget.block.Block{
+            .style = .Retro,
+            .positions = .ALL,
+        }, .{
+            .x = 0,
+            .y = 0,
+            .width = 5,
+            .height = 5,
+        });
         try self.tui.draw();
     }
 
