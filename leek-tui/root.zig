@@ -3,8 +3,8 @@ pub const termy = @import("termy");
 pub const stdx = @import("stdx");
 
 pub const widget =struct{
-    pub const block = @import("widgets/block.zig");
-    pub const text = @import("widgets/block.zig");
+    pub const Block = @import("widgets/block.zig").Block;
+    pub const Text = @import("widgets/text.zig").Text;
 };
 
 pub const tui = @import("tui.zig");

@@ -143,6 +143,7 @@ pub const Buffer = struct {
         } else if (self.cells.items.len < area) {
             try self.cells.appendNTimes(self.allocator, .empty(), area - self.cells.items.len);
         }
+        self.size = size;
         stdx.err = null;
         self.clear();
     }
@@ -152,14 +153,16 @@ pub const Buffer = struct {
         return &self.cells.items[x + (y * self.size.width)];
     }
 
-    pub const Diff = struct { x: u16, y: u16, cell: *const Cell };
+    pub const Diff = struct { x: u16, y: u16, continuation: bool = false, cell: *const Cell, };
 
     /// Returns the cells that need to be drawn
     pub fn diffs(self: *const Buffer, allocator: std.mem.Allocator, other: *const Buffer) !std.ArrayList(Diff) {
         var difs: std.ArrayList(Diff) = .empty;
         var idx: usize = 0;
         var invalidate: usize = 0;
-        while (idx < self.cells.items.len) : (idx += 1) {
+        var continuation: usize = 0;
+
+        while (idx < self.cells.items.len){
             const cur = &self.cells.items[idx];
             const prev = &other.cells.items[idx];
 
@@ -167,20 +170,36 @@ pub const Buffer = struct {
             const cw = if(cur.symbol)|sym|try width.graphemeWidth(sym, false) else 1;
             const pw = if(prev.symbol)|sym|try width.graphemeWidth(sym, false) else 1;
             stdx.err = null;
-            invalidate = @max(@max(cw, pw), invalidate) -| 1;
-            idx += cw -| 1;
-
-            if (!cur.eq(prev) or invalidate > 0) {
-                const y = if (idx == 0) 0 else @divTrunc(idx, self.size.width);
+            
+            const is_continuation = continuation > 0;
+            const changed = !cur.eq(prev);
+            if (changed or invalidate > 0) {
+                const x = idx % self.size.width;
+                const y = idx / self.size.width;
                 difs.append(allocator, .{
-                    .x = @intCast((idx - y * self.size.width) + 1),
+                    .x = @intCast(x + 1),
                     .y = @intCast(y + 1),
-                    .cell = &self.cells.items[idx],
+                    .continuation = is_continuation,
+                    .cell = cur,
                 }) catch |err| {
                     stdx.err = "Failed to diff";
                     return err;
                 };
             }
+            if (continuation > 0) {
+                continuation -= 1;
+            }
+
+            if (cur.symbol != null and cw > 1) {
+                continuation = cw - 1;
+            }
+
+            if (changed) {
+                invalidate = @max(cw, pw) - 1;
+            } else if (invalidate > 0) {
+                invalidate -= 1;
+            }
+            idx += 1;
         }
         return difs;
     }

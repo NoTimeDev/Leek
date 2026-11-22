@@ -136,7 +136,6 @@ pub const Tui = struct {
     pub fn draw(self: *Tui) !void {
         const cur = &self.buffer[self.curbuffer];
         var diffs = try cur.diffs(self.allocator, &self.buffer[~self.curbuffer]);
-        //std.debug.print("{any}\n", .{diffs.items});
         const writer = self.tty.writer();
         stdx.err = "Failed to draw contents";
         var fg: termy.Style.Color = .Reset;
@@ -167,6 +166,7 @@ pub const Tui = struct {
                 try self.diff_mod(d.cell.mod, mod);
                 mod = d.cell.mod;
             }
+            if(d.continuation) continue;
             if(d.cell.symbol)|sym|
                 try writer.writeAll(sym)
             else 

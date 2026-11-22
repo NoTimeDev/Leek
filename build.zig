@@ -1,10 +1,22 @@
 const std = @import("std");
+const Backend = enum {
+    fallback,
+    vt,
+    native,
+};
+
 
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
-    const termy = b.dependency("termy", .{ .target = target, .optimize = optimize });
+    const backend = b.option(Backend, "out", "Choose the backend") orelse .fallback;
+    const termy = b.dependency("termy", .{
+        .target = target,
+        .optimize = optimize,
+        .out = backend 
+    });
+
     const tmod = termy.module("termy");
 
     const stdx_mod = b.addModule("stdx", .{

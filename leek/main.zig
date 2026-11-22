@@ -2,19 +2,22 @@ const std = @import("std");
 const builtin = @import("builtin");
 const leek = @import("leek");
 const stdx = leek.stdx;
+const tui = leek.tui;
 
 const App = struct {
     tty: leek.termy.Tty,
     input: leek.termy.Input,
     termy_buffer: [1024]u8,
-    tui: leek.tui.Tui,
+    tui: tui.Tui,
     running: bool,
+    line: usize = 0,
 
     pub fn init(self: *App, io: std.Io) !void {
         self.tty = .init(io, try leek.termy.sysOut(), &self.termy_buffer, try leek.termy.sysIn());
         self.tui = try .init(&self.tty, leek.allocator);
         self.input = .init(&self.tty);
         self.running = true;
+        self.line = 0;
     }
 
     pub fn deinit(self: *App) void {
@@ -41,15 +44,16 @@ const App = struct {
     }
 
     pub fn render(self: *App) !void {
-        try self.tui.render(leek.tui.widget.block.Block{
-            .style = .Retro,
+        const block: tui.widget.Block = .{
+            .style = .Rounded,
+            .bg = .{ .Rgb = .{
+                .b = 8,
+                .g = 8,
+                .r = 8,
+            } },
             .positions = .ALL,
-        }, .{
-            .x = 0,
-            .y = 0,
-            .width = 5,
-            .height = 5,
-        });
+        };
+        try self.tui.render(block, self.tui.size);
         try self.tui.draw();
     }
 
@@ -71,33 +75,37 @@ const App = struct {
 };
 
 pub fn main(init: std.process.Init) void {
-    var app: App = undefined;
-    app.init(init.io) catch {
-        if (leek.stdx.err) |e| {
-            std.debug.print("Leek Failed: {s}\n", .{e});
-        }
-        if (builtin.mode == .debug) {
-            std.debug.dumpCurrentStackTrace(.{});
-        }
-        std.process.exit(1);
-    };
-    app.run() catch {
-        app.deinit();
-        if (leek.stdx.err) |e| {
-            std.debug.print("Leek Failed: {s}\n", .{e});
-        }
-        if (builtin.mode == .debug) {
-            std.debug.dumpCurrentStackTrace(.{});
-        }
-        std.process.exit(1);
-    };
+    _ = init;
+//     var app: App = undefined;
+//     app.init(init.io) catch {
+//         if (leek.stdx.err) |e| {
+//             std.debug.print("Leek Failed: {s}\n", .{e});
+//         }
+//         if (builtin.mode == .debug) {
+//             std.debug.dumpCurrentStackTrace(.{});
+//         }
+//         std.process.exit(1);
+//     };
+//     app.run() catch {
+//         app.deinit();
+//         if (leek.stdx.err) |e| {
+//             std.debug.print("Leek Failed: {s}\n", .{e});
+//         }
+//         if (builtin.mode == .debug) {
+//             std.debug.dumpCurrentStackTrace(.{});
+//         }
+//         std.process.exit(1);
+//     };
 
-    app.deinit();
-    if (builtin.mode == .debug) {
-        const leaked = leek.dbg.deinit();
-        if (leaked != 0) {
-            std.debug.print("{} allocations leaked!\n", .{leaked});
-            std.process.exit(1);
-        }
-    }
+//     app.deinit();
+//     if (builtin.mode == .debug) {
+//         const leaked = leek.dbg.deinit();
+//         if (leaked != 0) {
+//             std.debug.print("{} allocations leaked!\n", .{leaked});
+//             std.process.exit(1);
+//         }
+//     }
+    
+    var rope: stdx.rope.Rope = .init(leek.allocator);
+    try rope.replace(.{.start = 0, .end = 0}, "Hello");
 }
