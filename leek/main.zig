@@ -74,38 +74,54 @@ const App = struct {
     }
 };
 
-pub fn main(init: std.process.Init) void {
-    _ = init;
-//     var app: App = undefined;
-//     app.init(init.io) catch {
-//         if (leek.stdx.err) |e| {
-//             std.debug.print("Leek Failed: {s}\n", .{e});
-//         }
-//         if (builtin.mode == .debug) {
-//             std.debug.dumpCurrentStackTrace(.{});
-//         }
-//         std.process.exit(1);
-//     };
-//     app.run() catch {
-//         app.deinit();
-//         if (leek.stdx.err) |e| {
-//             std.debug.print("Leek Failed: {s}\n", .{e});
-//         }
-//         if (builtin.mode == .debug) {
-//             std.debug.dumpCurrentStackTrace(.{});
-//         }
-//         std.process.exit(1);
-//     };
+pub fn main(init: std.process.Init) !void {
+    //     var app: App = undefined;
+    //     app.init(init.io) catch {
+    //         if (leek.stdx.err) |e| {
+    //             std.debug.print("Leek Failed: {s}\n", .{e});
+    //         }
+    //         if (builtin.mode == .debug) {
+    //             std.debug.dumpCurrentStackTrace(.{});
+    //         }
+    //         std.process.exit(1);
+    //     };
+    //     app.run() catch {
+    //         app.deinit();
+    //         if (leek.stdx.err) |e| {
+    //             std.debug.print("Leek Failed: {s}\n", .{e});
+    //         }
+    //         if (builtin.mode == .debug) {
+    //             std.debug.dumpCurrentStackTrace(.{});
+    //         }
+    //         std.process.exit(1);
+    //     };
 
-//     app.deinit();
-//     if (builtin.mode == .debug) {
-//         const leaked = leek.dbg.deinit();
-//         if (leaked != 0) {
-//             std.debug.print("{} allocations leaked!\n", .{leaked});
-//             std.process.exit(1);
-//         }
-//     }
-    
-    var rope: stdx.rope.Rope = .init(leek.allocator);
-    try rope.replace(.{.start = 0, .end = 0}, "Hello");
+    //     app.deinit();
+    //     if (builtin.mode == .debug) {
+    //         const leaked = leek.dbg.deinit();
+    //         if (leaked != 0) {
+    //             std.debug.print("{} allocations leaked!\n", .{leaked});
+    //             std.process.exit(1);
+    //         }
+    //     }
+
+    var piece: stdx.line_piece.LinePiece = try .init(init.gpa, "This should come after!");
+    defer piece.deinit(init.gpa);
+    try piece.insert(init.gpa, 0, 0, "AnotherLine ");
+    try piece.insert(init.gpa, 0, 7, " Other ");
+    try piece.insert(init.gpa, 0, 7, "yster fa");
+
+    var curr_p: ?@TypeOf(piece.lines.index(0).pieces.root) = piece.lines.index(0).pieces.root;
+    while (curr_p) |node| {
+        switch (node.value.buffer) {
+            .additional => {
+                std.debug.print("{s}", .{piece.add_buffer.items[node.value.start..node.value.end]});
+            },
+            .original => {
+                std.debug.print("{s}", .{piece.original_buffer[node.value.start..node.value.end]});
+            },
+        }
+        curr_p = node.next;
+    }
+    std.debug.print("\n", .{});
 }

@@ -166,10 +166,10 @@ pub const Tui = struct {
                 try self.diff_mod(d.cell.mod, mod);
                 mod = d.cell.mod;
             }
-            if(d.continuation) continue;
-            if(d.cell.symbol)|sym|
+            if (d.continuation) continue;
+            if (d.cell.symbol) |sym|
                 try writer.writeAll(sym)
-            else 
+            else
                 try writer.writeAll(" ");
         }
         try self.style.setUnderlineColor(.Reset);

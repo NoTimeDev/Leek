@@ -5,17 +5,12 @@ const Backend = enum {
     native,
 };
 
-
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
     const backend = b.option(Backend, "out", "Choose the backend") orelse .fallback;
-    const termy = b.dependency("termy", .{
-        .target = target,
-        .optimize = optimize,
-        .out = backend 
-    });
+    const termy = b.dependency("termy", .{ .target = target, .optimize = optimize, .out = backend });
 
     const tmod = termy.module("termy");
 

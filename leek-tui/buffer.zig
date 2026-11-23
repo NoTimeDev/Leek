@@ -27,7 +27,7 @@ pub const Cell = struct {
 
     pub fn empty() Cell {
         return .{
-            .symbol = null, 
+            .symbol = null,
             .bg = .Reset,
             .fg = .Reset,
             .uc = .Reset,
@@ -36,10 +36,10 @@ pub const Cell = struct {
     }
 
     pub fn eq(self: *const Cell, other: *const Cell) bool {
-            return (if (self.symbol) |a|
-                if (other.symbol) |b| std.mem.eql(u8, a, b) else false
-            else
-                other.symbol == null) and
+        return (if (self.symbol) |a|
+            if (other.symbol) |b| std.mem.eql(u8, a, b) else false
+        else
+            other.symbol == null) and
             std.meta.eql(self.bg, other.bg) and
             std.meta.eql(self.fg, other.fg) and
             std.meta.eql(self.uc, other.uc) and
@@ -47,18 +47,18 @@ pub const Cell = struct {
     }
 
     //----I Love Chaining----
-    
+
     ///Allocator must be used in Buffer, and in previous setSymbol calls
     pub fn setSymbol(self: *Cell, sym: []const u8, allocator: std.mem.Allocator) *Cell {
         // Maybe change this to an error later on but for now, die!
-        if(self.symbol)|sy| allocator.free(sy);
+        if (self.symbol) |sy| allocator.free(sy);
         self.symbol = allocator.dupe(u8, sym) catch null;
         return self;
     }
-    
+
     ///Allocator must be used in Buffer, and in previous setSymbol calls
-    pub fn setSymbolFromChar(self: *Cell, ch: u21, allocator: std.mem.Allocator) *Cell{
-        if(self.symbol)|sy| allocator.free(sy);
+    pub fn setSymbolFromChar(self: *Cell, ch: u21, allocator: std.mem.Allocator) *Cell {
+        if (self.symbol) |sy| allocator.free(sy);
 
         const result = allocator.alloc(u8, 4) catch {
             self.symbol = null;
@@ -78,10 +78,9 @@ pub const Cell = struct {
         return self;
     }
 
-    pub fn deinit(self: *Cell, allocator: std.mem.Allocator) void{
-        if(self.symbol)|sym| 
+    pub fn deinit(self: *Cell, allocator: std.mem.Allocator) void {
+        if (self.symbol) |sym|
             allocator.free(sym);
-
     }
 
     pub fn setBg(self: *Cell, bg: termy.Style.Color) *Cell {
@@ -126,7 +125,7 @@ pub const Buffer = struct {
     /// clears a buffer
     pub inline fn clear(self: *Buffer) void {
         for (self.cells.items) |*cell| {
-            if(cell.symbol)|sym| self.allocator.free(sym);
+            if (cell.symbol) |sym| self.allocator.free(sym);
             cell.* = .empty();
         }
     }
@@ -153,7 +152,12 @@ pub const Buffer = struct {
         return &self.cells.items[x + (y * self.size.width)];
     }
 
-    pub const Diff = struct { x: u16, y: u16, continuation: bool = false, cell: *const Cell, };
+    pub const Diff = struct {
+        x: u16,
+        y: u16,
+        continuation: bool = false,
+        cell: *const Cell,
+    };
 
     /// Returns the cells that need to be drawn
     pub fn diffs(self: *const Buffer, allocator: std.mem.Allocator, other: *const Buffer) !std.ArrayList(Diff) {
@@ -162,15 +166,15 @@ pub const Buffer = struct {
         var invalidate: usize = 0;
         var continuation: usize = 0;
 
-        while (idx < self.cells.items.len){
+        while (idx < self.cells.items.len) {
             const cur = &self.cells.items[idx];
             const prev = &other.cells.items[idx];
 
             stdx.err = "Failed to get grapheme size";
-            const cw = if(cur.symbol)|sym|try width.graphemeWidth(sym, false) else 1;
-            const pw = if(prev.symbol)|sym|try width.graphemeWidth(sym, false) else 1;
+            const cw = if (cur.symbol) |sym| try width.graphemeWidth(sym, false) else 1;
+            const pw = if (prev.symbol) |sym| try width.graphemeWidth(sym, false) else 1;
             stdx.err = null;
-            
+
             const is_continuation = continuation > 0;
             const changed = !cur.eq(prev);
             if (changed or invalidate > 0) {
@@ -204,7 +208,7 @@ pub const Buffer = struct {
         return difs;
     }
     pub fn deinit(self: *Buffer) void {
-        for(self.cells.items)|*c|{
+        for (self.cells.items) |*c| {
             c.deinit(self.allocator);
         }
         self.cells.deinit(self.allocator);
